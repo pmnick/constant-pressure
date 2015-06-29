@@ -47,7 +47,7 @@ tempFileName = "AutosavedData.txt"
 Average = 3 #number of samples over which the "show" variables will be averaged
 flowshow = 0.0
 Diffshow= 0.0
-maxPressure = 1.0
+maxPressure = 0.0
 popupDesc = "Enter Sample Name (ie 31-A)"
 
 #Setting up GUI
@@ -72,8 +72,10 @@ class popupWindow(object):
 class mainWindow(object):
     def __init__(self,master):
         self.master=master
-        self.b2=Button(Controls,text="Update Pressure Target",command=lambda: PSdisplay.set((str(self.entryValue()))))
-        self.b2.place(x=85,y=223)
+        self.b=Button(C,text="Exit",command= callback_end)
+        self.b.place(x=300,y=350)
+##        self.b2=Button(C,text="Update Pressure Target",command=lambda: PSdisplay.set((str(self.entryValue()))))
+##        self.b2.place(x=125,y=300)
 
     def popup(self):
         self.w=popupWindow(self.master)
@@ -112,9 +114,23 @@ MP.set('0')
 MaxP_label = Label(C, textvariable= MP, padx=5, font=("Helvetica",16))
 MaxP_label.place(x=50, y=100)
 SP = StringVar()
-SP.set('0')
+SP.set('-30')
 SP_label = Label(C, textvariable= SP, padx=5, font=("Helvetica",16))
-SP_label.place(x=50, y=100)
+SP_label.place(x=50, y=300)
+caption = "Pressure Setpoint"
+content = "-30"
+e = Entry(C, text=caption, textvariable=content)
+##e = Entry(C)
+e.place(x=100,y=300)
+##Controls= LabelFrame(root,text='Controls',height=270,width=w-450)
+##Controls.pack_propagate(False)
+##Controls.place(x=0,y=0)
+
+
+##PSdisplay = StringVar()
+##PSdisplay.set(str(PressureTarget))
+##PSlabel = Label(C, textvariable=PSdisplay)
+##PSlabel.pack()
 
 #--- Graph settings
 screenWidth = 450
@@ -151,17 +167,6 @@ def coordinate():
         xy0Coords[i] = x0Coords[i/2]
         xy0Coords[i+1] = y0Coords[i/2]
 
-
-# setup thresholds
-Controls= LabelFrame(root,text='Controls',height=270,width=w-450)
-Controls.pack_propagate(False)
-Controls.place(x=0,y=0)
-
-
-PSdisplay = StringVar()
-PSdisplay.set(str(PressureTarget))
-PSlabel = Label(Controls, textvariable="Pressure setpoint")
-PSlabel.pack()
 
 #---End initiation of lists
 
@@ -252,7 +257,7 @@ def move_time():
         maxPressure = Diffshow
     maxP = GraphC.create_rectangle(0,250,480,249-int(maxPressure*250/100), outline="red") #why dividing backwashflow?? <--------------------------
     MP.set("Max Pressure: " + str(maxPressure) + " psi")
-    SP.set("Pressure Setpoint: " + str(SPdisplay.get()) + " mBar")
+    #SP.set("Pressure Setpoint: " + str('-41') + " mbar")
     shiftCoords(249-(Diffshow*250/100))
     cl0 = GraphC.create_line(xy0Coords)
     c11 = Graph2C.create_oval(Diffshow*screenWidth/100-2,250-flowshow*250/20-2,Diffshow*screenWidth/100+2,250-flowshow*250/20+2)
@@ -289,7 +294,7 @@ def writeData():
     root.after(samplePeriod,writeData)
 
 #-------------------------------- End Sequence --------------------------------------
-def callback_end(event):
+def callback_end():
     global FlowCount, StartTime, popupDesc
     # GPIO.cleanup()#i think this would get get rid of the draining process
     print("max pressure was: " + str(maxPressure))
@@ -303,7 +308,7 @@ def callback_end(event):
     spi_0.close()
     # a.write("\n" + str("Max Pressure was: ") + str(maxPressure))
     # a.close()
-    os.rename(destination + tempFileName, destination + m.entryValue() + ".txt")
+    #os.rename(destination + tempFileName, destination + m.entryValue() + ".txt")
     print("shutting down")
     quit()
 
@@ -313,7 +318,7 @@ GPIO.add_event_detect(ForwardFlow, GPIO.RISING, callback=callback_fflow)
 
 
 #----------------------------------Main loop----------------------------------------
-C.bind("e",callback_end)
+#C.bind("e",callback_end)
 C.pack()
 GraphC.pack(anchor=W)
 Graph2C.pack(anchor=E)
