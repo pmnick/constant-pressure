@@ -125,14 +125,14 @@ class Indicator(object):
     def create_label(self,text):
         content = StringVar()
         content.set(text)
-        return = Label(self.parent, textvariable=content, padx=5, font=("Helvetica",16))
+        return Label(self.parent, textvariable=content, padx=5, font=("Helvetica",16))
 
     def change_state(self,new_state):
         if new_state in self.valid_states:
             self.state = new_state
         else:
             self.state = 'disabled'
-        self.parent(self.indicator,state=self.state)
+        self.parent.itemconfig(self.indicator,state=self.state)
 
 
 
