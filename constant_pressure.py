@@ -82,7 +82,7 @@ class mainWindow(object):
         self.master=master
         self.b=Button(C,text="Exit",command= callback_end)
         self.b.place(x=300,y=350)
-        self.b2=Button(C,text="Update Setpoint =>",command=updateSetpoint)
+        self.b2=Button(C,text="Update Setpoint",command=updateSetpoint)
         self.b2.place(x=350,y=300)
 
     def popup(self,**kwargs):
@@ -95,7 +95,7 @@ class mainWindow(object):
 def updateSetpoint():
     m.popup(desc='Enter a new pressure setpoint in mbar:',confirm_text='update')
     PressureSetpoint = int(m.entryValue())
-    SP_current_text.set('CurrentSetpoint = ' + str(PressureSetpoint))
+    SP_current_text.set('Current Setpoint = ' + str(PressureSetpoint))
     
 
 root = Tk()
@@ -134,7 +134,7 @@ MaxP_label.place(x=50, y=100)
 SP_current_text = StringVar()
 SP_current_text.set('Current Setpoint = '+ str(PressureSetpoint))
 SP_current = Label(C, textvariable=SP_current_text, padx=5, font=("Helvetica",16))
-SP_current.place(x=50, y=350)
+SP_current.place(x=50, y=300)
 
 #--- Graph settings
 screenWidth = 450
