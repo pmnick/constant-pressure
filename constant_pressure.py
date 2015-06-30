@@ -184,7 +184,7 @@ def to_px(y):
 #debugger()
 
 GraphC=Canvas(Graph, bg = "gray", height = graph_height, width = screenWidth-1)
-maxP = GraphC.create_rectangle(0,0,20,50)
+SP_line = GraphC.create_line(0,to_px(PressureSetpoint),0,to_px(PressureSetpoint))
 cl0 = GraphC.create_line(xy0Coords,smooth=True)
 
 for y in range(ymin,ymax,axis_increment):
@@ -242,12 +242,13 @@ def shiftCoords(nextValue):
 #-------------------------------- Update Graph --------------------------------------
 #updates the GUI based on the new time
 def move_time():
-    global maxP,MP,cl0,xy0Coords,resolution,baseTime,forwardflow,Diffshow,maxPressure,flowshow,screenWidth, PressureSetpoint
-    GraphC.delete(maxP)
+    global SP_line,MP,cl0,xy0Coords,resolution,baseTime,forwardflow,Diffshow,maxPressure,flowshow,screenWidth, PressureSetpoint
+    GraphC.delete(SP_line)
     GraphC.delete(cl0)
     if maxPressure < Diffshow:
         maxPressure = Diffshow
-    SP_line = GraphC.create_line(0,screenWidth,to_px(PressureSetpoint),to_px(PressureSetpoint), fill="red")
+    
+    SP_line = GraphC.create_line(0,to_px(PressureSetpoint),screenWidth,to_px(PressureSetpoint), fill="red")
     MP.set("Max Pressure: " + str(maxPressure) + " psi")
     #PressureSetpoint = int(SP_content.get())
     shiftCoords(249-(Diffshow*250/100))
