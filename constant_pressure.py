@@ -11,8 +11,11 @@ import sys, os
 #this is a test web edit
 
 #To Do
+## Change red line to show current set point, not max pressure.
+## Remove maxPressure logic
+## Add control of pump direction (using pin 8, rising edge sets infuse, falling edge sets refill
+## Remove comments
 ## Check math on flow and pressure sensor (callibrate the pressure sensor
-## beware of faulty wires... causes extreme noise
 ## fingernail polish pressure sensor so it doesn't get plugged in backwards
 ## order backup RPis
 ## order backup Differential op amps and ADCs
@@ -24,7 +27,9 @@ import sys, os
 print("start")
 
 #Setting up Global Variables
-PressureTarget = -30 # mBar
+PressureSetpoint = -30 # mBar
+PumpStatus = False # false = off, true = on
+PumpControl = False
 
 #-------------------------------- Initializations --------------------------------------
 #Setting up Spi to read ADC
@@ -48,21 +53,24 @@ Average = 3 #number of samples over which the "show" variables will be averaged
 flowshow = 0.0
 Diffshow= 0.0
 maxPressure = 0.0
-popupDesc = "Enter Sample Name (ie 31-A)"
+
 
 #Setting up GUI
 
 #popup window for entering sample name
 class popupWindow(object):
-    def __init__(self,master):
-        global popupDesc
+    def __init__(self,master,**kwargs):
+        if 'desc' not in kwargs:
+            kwargs['desc'] = 'Enter a value: '
+        if 'confirm_text' not in kwargs:
+            kwargs['confirm_text'] = 'Submit'
         top=self.top=Toplevel(master)
-        self.l=Label(top,text = popupDesc)
+        self.l=Label(top,text = kwargs['desc'])
         self.l.pack()
         self.e=Entry(top)
         self.e.focus()
         self.e.pack()
-        self.b=Button(top,text='OK',command=self.cleanup)
+        self.b=Button(top,text=kwargs['confirm_text'],command=self.cleanup)
         self.b.pack()
         
     def cleanup(self):
@@ -74,24 +82,30 @@ class mainWindow(object):
         self.master=master
         self.b=Button(C,text="Exit",command= callback_end)
         self.b.place(x=300,y=350)
-##        self.b2=Button(C,text="Update Pressure Target",command=lambda: PSdisplay.set((str(self.entryValue()))))
-##        self.b2.place(x=125,y=300)
+        self.b2=Button(C,text="Update Setpoint =>",command=updateSetpoint)
+        self.b2.place(x=350,y=300)
 
-    def popup(self):
-        self.w=popupWindow(self.master)
+    def popup(self,**kwargs):
+        self.w=popupWindow(self.master,**kwargs)
         self.master.wait_window(self.w.top)
 
     def entryValue(self):
         return self.w.value
 
+def updateSetpoint():
+    m.popup(desc='Enter a new pressure setpoint in mbar:',confirm_text='update')
+    PressureSetpoint = int(m.entryValue())
+    SP_current_text.set('CurrentSetpoint = ' + str(PressureSetpoint))
+    
+
 root = Tk()
-root.title("Burst Tester")
+root.title("Constant Pressure Controller")
 
 #----initializing GUI------------------
 ##background_image = PhotoImage(file='/home/pi/Desktop/Code/background.gif')
 ##w=background_image.width()
 ##h=background_image.height() 
-C = Canvas(root, bg='#333',height=400,width=1200) #<------- i changed heigt and width... need updating
+C = Canvas(root, bg='#333',height=400,width=600) #<------- i changed heigt and width... need updating
 C.focus_set() # Sets the keyboard focus to the canvas
 #frame=Frame(root)
 #frame= LabelFrame(root, text="Readouts",height=400,width=screenWidth)
@@ -101,36 +115,26 @@ DL= StringVar()
 DL.set('0')
 differential_label = Label(C, textvariable=DL, padx=5,font=("Helvetica",16))
 differential_label.place(x=50,y=150)
+
 FRL= StringVar()
 FRL.set('0')
 Flowrate_label = Label(C, textvariable=FRL,pady=3,font=("Helvetica",16))
 Flowrate_label.place(x=50,y=200)
+
 FL= StringVar()
 FL.set('0')
 Filtrate_label = Label(C, textvariable=FL, padx=5,font=("Helvetica",16))
 Filtrate_label.place(x=50,y=250)
+
 MP = StringVar()
 MP.set('0')
 MaxP_label = Label(C, textvariable= MP, padx=5, font=("Helvetica",16))
 MaxP_label.place(x=50, y=100)
-SP = StringVar()
-SP.set('-30')
-SP_label = Label(C, textvariable= SP, padx=5, font=("Helvetica",16))
-SP_label.place(x=50, y=300)
-caption = "Pressure Setpoint"
-content = "-30"
-e = Entry(C, text=caption, textvariable=content)
-##e = Entry(C)
-e.place(x=100,y=300)
-##Controls= LabelFrame(root,text='Controls',height=270,width=w-450)
-##Controls.pack_propagate(False)
-##Controls.place(x=0,y=0)
 
-
-##PSdisplay = StringVar()
-##PSdisplay.set(str(PressureTarget))
-##PSlabel = Label(C, textvariable=PSdisplay)
-##PSlabel.pack()
+SP_current_text = StringVar()
+SP_current_text.set('Current Setpoint = '+ str(PressureSetpoint))
+SP_current = Label(C, textvariable=SP_current_text, padx=5, font=("Helvetica",16))
+SP_current.place(x=50, y=350)
 
 #--- Graph settings
 screenWidth = 450
@@ -141,9 +145,6 @@ x0Coords = []
 y0Coords = []
 xy0Coords = []
 FlowrateAvg = []
-##BackflowAvg = []
-##FPumpAvg = []
-##BPumpAvg = []
 DiffAvg = []
 
 coordLength = int(screenWidth/resolution)
@@ -155,9 +156,6 @@ for i in range(0,coordLength):
     xy0Coords.append(0)
 for i in range(0,Average):
     FlowrateAvg.append(0.0)
-##    BackflowAvg.append(0)
-##    FPumpAvg.append(ForwardPumpTarget)
-##    BPumpAvg.append(BackwashPumpTarget)
     DiffAvg.append(0)
     
 #putting X and Y corrdinites in a list
@@ -173,12 +171,8 @@ def coordinate():
 Graph= LabelFrame(root, text="Pressure Graph",height=250,width=screenWidth)
 Graph.pack(side="left")
 GraphC=Canvas(Graph, bg = "gray", height = 249, width = screenWidth-1)
-Graph2= LabelFrame(root, text = "Flow vs. Pressure", height = 250, width=screenWidth)
-Graph2.pack(side="right")
-Graph2C=Canvas(Graph2, bg= "gray", height = 249, width = screenWidth-1)
 maxP = GraphC.create_rectangle(0,0,20,50)
 cl0 = GraphC.create_line(xy0Coords,smooth=True)
-c11 = Graph2C.create_oval(Diffshow*screenWidth/100-2,250-flowshow*250/20-2,Diffshow*screenWidth/100+2,250-flowshow*250/20+2)
 scale5 = Label(GraphC, text=' 100-', bg = "gray")
 scale5.place(x=0,y=(240-20*12))
 scale7 = Label(GraphC, text=' 90-', bg = "gray")
@@ -202,21 +196,18 @@ scale2.place(x=0,y=(240-2*12))
 scale0 = Label(GraphC, text=' 0-', bg = "gray")
 scale0.place(x=0,y=(240-0*20))
 
-x2Axis = Label(Graph2C, text="Pressure (psi)")
-x2Axis.place(x=screenWidth/2-10,y=230)
-
-y2Axis = Label(Graph2C, text="Flowrate", wraplength=1)
-y2Axis.place(x= 0,y=250/2-50)
 
 #setting up GPIO pins                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
 ForwardFlow = 21
 PumpTrigger = 12
+PumpRunningInd = 16
 on = GPIO.LOW
 off = GPIO.HIGH
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 GPIO.setup(ForwardFlow, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)#Generally reads LOW
-GPIO.setup(PumpTrigger,GPIO.OUT,initial=GPIO.HIGH)
+GPIO.setup(PumpTrigger,GPIO.OUT,initial=GPIO.LOW)# pump control
+GPIO.setup(PumpRunningInd, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) 
 
 
 #---------------------------------------------------------------------------------------
@@ -250,17 +241,17 @@ def shiftCoords(nextValue):
 #-------------------------------- Update Graph --------------------------------------
 #updates the GUI based on the new time
 def move_time():
-    global maxP,MP,cl0,xy0Coords,resolution,baseTime,forwardflow,Diffshow,maxPressure,flowshow,screenWidth, c11
+    global maxP,MP,cl0,xy0Coords,resolution,baseTime,forwardflow,Diffshow,maxPressure,flowshow,screenWidth, PressureSetpoint
     GraphC.delete(maxP)
     GraphC.delete(cl0)
     if maxPressure < Diffshow:
         maxPressure = Diffshow
     maxP = GraphC.create_rectangle(0,250,480,249-int(maxPressure*250/100), outline="red") #why dividing backwashflow?? <--------------------------
     MP.set("Max Pressure: " + str(maxPressure) + " psi")
-    #SP.set("Pressure Setpoint: " + str('-41') + " mbar")
+    #PressureSetpoint = int(SP_content.get())
     shiftCoords(249-(Diffshow*250/100))
     cl0 = GraphC.create_line(xy0Coords)
-    c11 = Graph2C.create_oval(Diffshow*screenWidth/100-2,250-flowshow*250/20-2,Diffshow*screenWidth/100+2,250-flowshow*250/20+2)
+    #c11 = Graph2C.create_oval(Diffshow*screenWidth/100-2,250-flowshow*250/20-2,Diffshow*screenWidth/100+2,250-flowshow*250/20+2)
     #print(float(readadc_0(0))/1023*250)
     #title="V= " , str(round(3.3*float(readadc_0(2)-readadc_0(0))/1023,2)) , str(round(3.3*float(readadc_0(2))/1023,2)), str(round(3.3*float(readadc_0(0))/1023,2))
     #root.title(title)
@@ -268,7 +259,7 @@ def move_time():
 
 #-------------------------------- Write Data --------------------------------------
 def writeData(): 
-    global destination,Diffshow,samplePeriod,ForwardFlowCount,oldForwardFlowCount,forwardflow,FlowrateAvg,flowshow
+    global destination,Diffshow,samplePeriod,ForwardFlowCount,oldForwardFlowCount,forwardflow,FlowrateAvg,flowshow,PressureSetpoint, PumpStatus, PumpControl
 
     ##Calibration of sensor: Real Pressure = reading-(-1.06+.1007xreading) this was Marks
     ## Calibration done Jul 9, 2015 by nick
@@ -280,7 +271,35 @@ def writeData():
     DiffAvg.append(DifferentialPressure)
     Diffshow=np.mean(DiffAvg)
     DL.set("Diff Pressure: "+str(round(Diffshow,1)) + " psi")
-    
+
+    if PressureSetpoint > 0:
+        if DifferentialPressure < PressureSetpoint:
+            PumpControl = True
+        else:
+            PumpControl = False
+    else:
+        if DifferentialPressure > PressureSetpoint:
+            PumpControl = True
+        else:
+            PumpControl = False
+
+    # Current pump status detected on pin 3 of PhD 4400 syringe pump
+    PumpStatus = GPIO.input(PumpRunningInd) == GPIO.HIGH
+
+    # Pump control sent to Pin 7 on PhD 4400 syringe pump
+    # Rising edge starts pump
+    # Falling edge stops pump
+    if PumpStatus != PumpControl:
+        if PumpControl == True:
+            # check if previous signal was missed, cycle voltage to reset if needed
+            if GPIO.input(PumpTrigger) == GPIO.HIGH:
+                GPIO.output(PumpTrigger,GPIO.LOW)
+            GPIO.output(PumpTrigger,GPIO.HIGH)
+        else:
+            # check if previous signal was missed, cycle voltage to reset if needed
+            if GPIO.input(PumpTrigger) == GPIO.LOW:
+                GPIO.output(PumpTrigger,GPIO.HIGH)
+            GPIO.output(PumpTrigger,GPIO.LOW)
      
     forwardflow=((ForwardFlowCount-oldForwardFlowCount)/samplePeriod)*13.0435 #13.0435 = 1000/4600*60 #FTB2003 gets 4600 pulses per liter
     FlowrateAvg.pop(0)
@@ -320,8 +339,9 @@ GPIO.add_event_detect(ForwardFlow, GPIO.RISING, callback=callback_fflow)
 #----------------------------------Main loop----------------------------------------
 #C.bind("e",callback_end)
 C.pack()
+##SP_content.set(str(PressureSetpoint))
 GraphC.pack(anchor=W)
-Graph2C.pack(anchor=E)
+#Graph2C.pack(anchor=E)
 #Readouts.pack(anchor=S)
 root.after(baseTime,move_time)
 root.after(samplePeriod,writeData)
