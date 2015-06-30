@@ -7,6 +7,7 @@ import numpy as np
 import spidev
 from datetime import datetime, timedelta
 import sys, os
+from pdb import set_trace as debugger
 
 #this is a test web edit
 
@@ -106,7 +107,7 @@ root.title("Constant Pressure Controller")
 ##background_image = PhotoImage(file='/home/pi/Desktop/Code/background.gif')
 ##w=background_image.width()
 ##h=background_image.height() 
-C = Canvas(root, bg='#333',height=400,width=600) #<------- i changed heigt and width... need updating
+C = Canvas(root, bg='#333',height=513,width=600) #<------- i changed heigt and width... need updating
 C.focus_set() # Sets the keyboard focus to the canvas
 #frame=Frame(root)
 #frame= LabelFrame(root, text="Readouts",height=400,width=screenWidth)
@@ -169,35 +170,36 @@ def coordinate():
 
 #---End initiation of lists
 
-Graph= LabelFrame(root, text="Pressure Graph",height=250,width=screenWidth)
+Graph= LabelFrame(root, text="Pressure Graph",height=501,width=screenWidth)
 Graph.pack(side="left")
-GraphC=Canvas(Graph, bg = "gray", height = 249, width = screenWidth-1)
+height = 500
+ymin = -100
+ymax = 100
+axis_increment = 20
+
+def y_to_px(y):
+    global ymin,ymax,height
+    return int(height - (1.0*y-ymin)/(ymax-ymin)*height)
+
+#debugger()
+
+GraphC=Canvas(Graph, bg = "gray", height = height, width = screenWidth-1)
 maxP = GraphC.create_rectangle(0,0,20,50)
-cl0 = GraphC.create_line(xy0Coords,smooth=True)
-scale5 = Label(GraphC, text=' 100-', bg = "gray")
-scale5.place(x=0,y=(240-20*12))
-scale7 = Label(GraphC, text=' 90-', bg = "gray")
-scale7.place(x=0,y=(240-18*12))
-scale9 = Label(GraphC, text=' 80-', bg = "gray")
-scale9.place(x=0,y=(240-16*12))
-scale11 = Label(GraphC, text=' 70-', bg = "gray")
-scale11.place(x=0,y=(240-14*12))
-scale12 = Label(GraphC, text=' 60-', bg = "gray")
-scale12.place(x=0,y=(240-12*12))
-scale10 = Label(GraphC, text=' 50-', bg = "gray")
-scale10.place(x=0,y=(240-10*12))
-scale8 = Label(GraphC, text=' 40-', bg = "gray")
-scale8.place(x=0,y=(240-8*12))
-scale6 = Label(GraphC, text=' 30-', bg = "gray")
-scale6.place(x=0,y=(240-6*12))
-scale4 = Label(GraphC, text=' 20-', bg = "gray")
-scale4.place(x=0,y=(240-4*12))
-scale2 = Label(GraphC, text=' 10-', bg = "gray")
-scale2.place(x=0,y=(240-2*12))
-scale0 = Label(GraphC, text=' 0-', bg = "gray")
-scale0.place(x=0,y=(240-0*20))
+cl0 = GraphC.create_line(xy0Coords,smooth=True)   
 
+for y in range(ymin,ymax,axis_increment):
+    y_px = y_to_px(y)
+    if y_px < height and y_px > 0:
+        GraphC.create_text(25,y_px,anchor=W,text=str(y) + ' -')
 
+##num_steps = len(y_axis_labels)-1
+##step = int(1.0*height/num_steps)
+##for y in range(height,0,-1*step):
+##    label= str(y_axis_labels.pop())
+##    if y < height and y > 0:
+##        GraphC.create_text(25,y,anchor=W,text=label + ' -')
+
+    
 #setting up GPIO pins                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
 ForwardFlow = 21
 PumpTrigger = 12
