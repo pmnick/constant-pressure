@@ -105,13 +105,13 @@ def updateSetpoint():
     SP_current_text.set('Current Setpoint = ' + str(PressureSetpoint))
 
 def cycle_pump_enable():
-    global EnablePump, enable_ind
+    global EnablePump, C, enabled_ind
     # invert value
     EnablePump = not EnablePump
     if EnablePump == False:
-        enable_ind.config(state="DISABLED")
+        C.itemconfig(enabled_ind,state="disabled")
     else:
-        enable_ind.config(state="NORMAL")
+        C.itemconfig(enabled_ind,state="normal")
 
 
 root = Tk()
@@ -153,9 +153,9 @@ SP_current = Label(C, textvariable=SP_current_text, padx=5, font=("Helvetica",16
 SP_current.place(x=50, y=300)
 
 r = 10 #indicator radius
-centerX = 450
+centerX = 550
 centerY = 50
-enabled_ind = C.creat_oval(centerX-r,centerY-r,centerX+r,centerY+r,fill="green",disabledfill="red",state="DISABLED")
+enabled_ind = C.create_oval(centerX-r,centerY-r,centerX+r,centerY+r,fill="green",disabledfill="red",state="disabled")
 
 
 #--- Graph settings
