@@ -12,7 +12,7 @@ import sys, os
 
 #To Do
 ## Change red line to show current set point, not max pressure.
-## Remove maxPressure logic
+## Make graph handle different ranges (pos and neg?)
 ## Add control of pump direction (using pin 8, rising edge sets infuse, falling edge sets refill
 ## Remove comments
 ## Check math on flow and pressure sensor (callibrate the pressure sensor
@@ -27,7 +27,7 @@ import sys, os
 print("start")
 
 #Setting up Global Variables
-PressureSetpoint = -30 # mBar
+PressureSetpoint = 0 # mBar
 PumpStatus = False # false = off, true = on
 PumpControl = False
 
@@ -81,7 +81,7 @@ class mainWindow(object):
     def __init__(self,master):
         self.master=master
         self.b=Button(C,text="Exit",command= callback_end)
-        self.b.place(x=300,y=350)
+        self.b.place(x=500,y=350)
         self.b2=Button(C,text="Update Setpoint",command=updateSetpoint)
         self.b2.place(x=350,y=300)
 
@@ -93,6 +93,7 @@ class mainWindow(object):
         return self.w.value
 
 def updateSetpoint():
+    global PressureSetpoint
     m.popup(desc='Enter a new pressure setpoint in mbar:',confirm_text='update')
     PressureSetpoint = int(m.entryValue())
     SP_current_text.set('Current Setpoint = ' + str(PressureSetpoint))
@@ -246,7 +247,7 @@ def move_time():
     GraphC.delete(cl0)
     if maxPressure < Diffshow:
         maxPressure = Diffshow
-    maxP = GraphC.create_rectangle(0,250,480,249-int(maxPressure*250/100), outline="red") #why dividing backwashflow?? <--------------------------
+    maxP = GraphC.create_rectangle(0,250,480,249-int(1.0*PressureSetpoint*250/100), outline="red")
     MP.set("Max Pressure: " + str(maxPressure) + " psi")
     #PressureSetpoint = int(SP_content.get())
     shiftCoords(249-(Diffshow*250/100))
