@@ -93,6 +93,9 @@ class mainWindow(object):
 
     def popup(self,**kwargs):
         self.w=popupWindow(self.master,**kwargs)
+        x = self.master.winfo_x()
+        y = self.master.winfo_y()
+        self.w.top.geometry("%dx%d+%d+%d" % (250,100,x + screenWidth,y))
         self.master.wait_window(self.w.top)
 
     def entryValue(self):
@@ -207,6 +210,10 @@ pump_direction_ind.place(x=400, y=250,anchor=W)
 
 #--- Graph settings
 graph_height = 500
+graph_height = 500
+ymin = -80 # do multiples of 10
+ymax = 80
+axis_increment = 10 # this should divide evenly into the range
 screenWidth = 450 # should name graphWidth
 resolution = 1 #number of pixels between data points, for visual purposes only
 timeRange = .5 #minutes
@@ -241,10 +248,6 @@ def coordinate():
 
 Graph= LabelFrame(root, text="Pressure Graph",height=graph_height+1,width=screenWidth)
 Graph.pack(side="left")
-graph_height = 500
-ymin = -100
-ymax = 100
-axis_increment = 20 # this should divide evenly into the range
 
 def to_px(y):
     global ymin,ymax,graph_height
@@ -256,6 +259,7 @@ GraphC=Canvas(Graph, bg = "gray", height = graph_height, width = screenWidth-1)
 SP_line = GraphC.create_line(0,to_px(PressureSetpoint),0,to_px(PressureSetpoint))
 cl0 = GraphC.create_line(xy0Coords,smooth=True)
 
+# Add Y axis labels
 for y in range(ymin,ymax,axis_increment):
     y_px = to_px(y)
     if y_px < graph_height and y_px > 0:
@@ -263,7 +267,9 @@ for y in range(ymin,ymax,axis_increment):
             label = ' ' + str(y)
         else:
             label = str(y)
-        GraphC.create_text(25,y_px,anchor=W,text=label + '  -')
+        GraphC.create_text(10,y_px,anchor=W,text=label)
+        fill= 'gray1' if y == 0 else 'gray40'
+        GraphC.create_line(35,y_px,screenWidth,y_px,fill=fill)
 
 
 
