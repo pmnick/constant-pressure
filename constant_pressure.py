@@ -330,7 +330,7 @@ def move_time():
     SP_line = GraphC.create_line(0,to_px(PressureSetpoint),screenWidth,to_px(PressureSetpoint), fill="red")
     MP.set("Max Pressure: " + str(round(maxPressure,1)) + " psi")
     #PressureSetpoint = int(SP_content.get())
-    shiftCoords(249-(Diffshow*250/100))
+    shiftCoords(to_px(Diffshow))
     cl0 = GraphC.create_line(xy0Coords)
     #c11 = Graph2C.create_oval(Diffshow*screenWidth/100-2,250-flowshow*250/20-2,Diffshow*screenWidth/100+2,250-flowshow*250/20+2)
     #print(float(readadc_0(0))/1023*250)
@@ -346,9 +346,10 @@ def writeData():
     ## Calibration done Jul 9, 2015 by nick
     ## equation y=actual, x = pi, y=0.843x - 0.356
 
-    Reading = (3.3*float(readadc_0(1)-readadc_0(2))/1023)/1000 #convert to mv #conduct calibration here removed *100 here 
+    Reading = (3.3*float(readadc_0(1)-readadc_0(2))/1023)*100 # Differential reading in volts
+    #Reading = Reading*1000 # converted to mv
     #DifferentialPressure=round(0.843*Reading-0.356,1) # to PSI - 100 psi sensor (for burst tester)
-    DifferentialPressure=round(4207.1 * Reading - 2.6812,1) #to mbarr - 1 psi sensor (for cell filtration)
+    DifferentialPressure=round(3.6011 * Reading - 12.299,1) #to mbarr - 1 psi sensor (for cell filtration)
     DiffAvg.pop(0)
     DiffAvg.append(DifferentialPressure)
     Diffshow=np.mean(DiffAvg)
@@ -435,6 +436,10 @@ def callback_end():
     global FlowCount, StartTime, popupDesc
     # GPIO.cleanup()#i think this would get get rid of the draining process
     print("max pressure was: " + str(maxPressure))
+    print ("stopping pump")
+    EnablePump = False
+    writeData()
+    print ("pump stopped")
     #m.popup()
 ##    while m.entryValue() == "": #prevents entry of "" as file name.
 ##        m.popup()
@@ -447,6 +452,7 @@ def callback_end():
     # a.close()
     #os.rename(destination + tempFileName, destination + m.entryValue() + ".txt")
     print("shutting down")
+    
     quit()
     GPIO.cleanup()
 
