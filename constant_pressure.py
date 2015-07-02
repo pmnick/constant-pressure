@@ -439,7 +439,7 @@ def writeData():
 
 #-------------------------------- End Sequence --------------------------------------
 def callback_end():
-    global FlowCount, StartTime, popupDesc
+    global FlowCount, StartTime, popupDesc, EnablePump
     # GPIO.cleanup()#i think this would get get rid of the draining process
     print("max pressure was: " + str(maxPressure))
     print ("stopping pump")
