@@ -275,10 +275,10 @@ for y in range(ymin,ymax,axis_increment):
 
 #setting up GPIO pins
 ForwardFlow = 21
-PumpTrigger = 12
-PumpRunningInd = 16
+PumpTrigger = 17
+PumpRunningInd = 22
 PumpDirectionInd = 24
-PumpDirection = 25
+PumpDirection = 23
 on = GPIO.LOW
 off = GPIO.HIGH
 GPIO.setmode(GPIO.BCM)
