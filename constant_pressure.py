@@ -53,7 +53,7 @@ destination = "/home/pi/Desktop/Data/"
 tempFileName = "AutosavedData.txt"
 # a=open(destination + tempFileName,'w') #a means append to existing file, w means overwrite old data
 # a.write("\n\n"+ str(datetime.now()))
-Average = 3 #number of samples over which the "show" variables will be averaged
+Average = 5 #number of samples over which the "show" variables will be averaged
 flowshow = 0.0
 Diffshow= 0.0
 maxPressure = 0.0
@@ -363,12 +363,12 @@ def writeData():
     DL.set("Diff Pressure: "+str(round(Diffshow,1)) + " mbar")
 
     if PressureSetpoint > 0:
-        if DifferentialPressure < PressureSetpoint:
+        if max(Diffshow,DifferentialPressure) < PressureSetpoint:
             PumpControl = True
         else:
             PumpControl = False
     else:
-        if DifferentialPressure > PressureSetpoint:
+        if min(Diffshow,DifferentialPressure) > PressureSetpoint:
             PumpControl = True
         else:
             PumpControl = False
