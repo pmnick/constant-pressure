@@ -154,7 +154,7 @@ Controls= LabelFrame(root,text='Controls',height=270,width=w-450)
 Controls.pack_propagate(False)
 Controls.place(x=0,y=0)
 
-
+PressureTarget = -30 # mBar
 PSdisplay = StringVar()
 PSdisplay.set((str(PressureTarget)))
 PSlabel = Label(Controls, textvariable=Pressure setpoint)
