@@ -156,8 +156,8 @@ Controls.place(x=0,y=0)
 
 PressureTarget = -30 # mBar
 PSdisplay = StringVar()
-PSdisplay.set((str(PressureTarget)))
-PSlabel = Label(Controls, textvariable=Pressure setpoint)
+PSdisplay.set(str(PressureTarget))
+PSlabel = Label(Controls, textvariable="Pressure setpoint")
 PSlabel.pack()
 
 #---End initiation of lists
