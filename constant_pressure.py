@@ -23,6 +23,9 @@ import sys, os
 
 print("start")
 
+#Setting up Global Variables
+PressureTarget = -30 # mBar
+
 #-------------------------------- Initializations --------------------------------------
 #Setting up Spi to read ADC
 spi_0 = spidev.SpiDev()
@@ -154,7 +157,7 @@ Controls= LabelFrame(root,text='Controls',height=270,width=w-450)
 Controls.pack_propagate(False)
 Controls.place(x=0,y=0)
 
-PressureTarget = -30 # mBar
+
 PSdisplay = StringVar()
 PSdisplay.set(str(PressureTarget))
 PSlabel = Label(Controls, textvariable="Pressure setpoint")
