@@ -69,6 +69,8 @@ class popupWindow(object):
 class mainWindow(object):
     def __init__(self,master):
         self.master=master
+        self.b2=Button(Controls,text="Update Pressure Target",command=lambda: PSdisplay.set((str(self.entryValue()))))
+        self.b2.place(x=85,y=223)
 
     def popup(self):
         self.w=popupWindow(self.master)
@@ -106,7 +108,10 @@ MP = StringVar()
 MP.set('0')
 MaxP_label = Label(C, textvariable= MP, padx=5, font=("Helvetica",16))
 MaxP_label.place(x=50, y=100)
-
+SP = StringVar()
+SP.set('0')
+SP_label = Label(C, textvariable= SP, padx=5, font=("Helvetica",16))
+SP_label.place(x=50, y=100)
 
 #--- Graph settings
 screenWidth = 450
@@ -142,6 +147,19 @@ def coordinate():
     for i in range(0,coordLength*2,2):
         xy0Coords[i] = x0Coords[i/2]
         xy0Coords[i+1] = y0Coords[i/2]
+
+
+# setup thresholds
+Controls= LabelFrame(root,text='Controls',height=270,width=w-450)
+Controls.pack_propagate(False)
+Controls.place(x=0,y=0)
+
+
+PSdisplay = StringVar()
+PSdisplay.set((str(PressureTarget)))
+PSlabel = Label(Controls, textvariable=Pressure setpoint)
+PSlabel.pack()
+
 #---End initiation of lists
 
 Graph= LabelFrame(root, text="Pressure Graph",height=250,width=screenWidth)
@@ -184,11 +202,13 @@ y2Axis.place(x= 0,y=250/2-50)
 
 #setting up GPIO pins                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
 ForwardFlow = 21
+PumpTrigger = 12
 on = GPIO.LOW
 off = GPIO.HIGH
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 GPIO.setup(ForwardFlow, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)#Generally reads LOW
+GPIO.setup(PumpTrigger,GPIO.OUT,initial=GPIO.HIGH)
 
 
 #---------------------------------------------------------------------------------------
@@ -229,6 +249,7 @@ def move_time():
         maxPressure = Diffshow
     maxP = GraphC.create_rectangle(0,250,480,249-int(maxPressure*250/100), outline="red") #why dividing backwashflow?? <--------------------------
     MP.set("Max Pressure: " + str(maxPressure) + " psi")
+    SP.set("Pressure Setpoint: " + str(SPdisplay.get()) + " mBar")
     shiftCoords(249-(Diffshow*250/100))
     cl0 = GraphC.create_line(xy0Coords)
     c11 = Graph2C.create_oval(Diffshow*screenWidth/100-2,250-flowshow*250/20-2,Diffshow*screenWidth/100+2,250-flowshow*250/20+2)
