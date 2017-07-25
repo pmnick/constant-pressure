@@ -39,8 +39,8 @@ samplePeriod = 100  #milliseconds, time between data points written to txt file
 minimumtime = 1000
 destination = "/home/pi/Desktop/Data/"
 tempFileName = "AutosavedData.txt"
-a=open(destination + tempFileName,'w') #a means append to existing file, w means overwrite old data
-a.write("\n\n"+ str(datetime.now()))
+# a=open(destination + tempFileName,'w') #a means append to existing file, w means overwrite old data
+# a.write("\n\n"+ str(datetime.now()))
 Average = 3 #number of samples over which the "show" variables will be averaged
 flowshow = 0.0
 Diffshow= 0.0
@@ -281,7 +281,7 @@ def writeData():
     FRL.set("Flow rate: "+str(round(flowshow,1)) + " LPM")
     FL.set("Volume filtered: "+str(round(ForwardFlowCount/4600,4)) + " liters")
     data = str(round(DifferentialPressure,1)) + "\t" + str(round(forwardflow,1)) + "\t" + str(round(ForwardFlowCount/4600,4))
-    a.write("\n"+ str(datetime.now()) + "\t" + str(data))
+    # a.write("\n"+ str(datetime.now()) + "\t" + str(data))
     oldForwardFlowCount=ForwardFlowCount
     root.after(samplePeriod,writeData)
 
@@ -298,9 +298,10 @@ def callback_end(event):
 ##        m.popup()
     #print (m.entryValue())
     spi_0.close()
-    a.write("\n" + str("Max Pressure was: ") + str(maxPressure))
-    a.close()
+    # a.write("\n" + str("Max Pressure was: ") + str(maxPressure))
+    # a.close()
     os.rename(destination + tempFileName, destination + m.entryValue() + ".txt")
+    print("shutting down")
     quit()
 
 #Setting up event detection
