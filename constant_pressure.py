@@ -105,22 +105,26 @@ class Indicator(object):
         self.y=centerY
         self.valid_states = ['normal','disabled','hidden']
 
-        if 'text' in kwargs:
-            self.label = create_label(kwargs['text'])
-            self.label.place(centerX,centerY)
-
-        if 'state' in kwargs and kwargs['state'] in self.valid_states:
-            self.state = kwargs['state']
-        else:
-            self.state = 'disabled'
-
+        # set radius
         if 'radius' in kwargs:
             self.r = kwargs['radius']
         else:
             self.r = 10
 
+        # set valid state
+        if 'state' in kwargs and kwargs['state'] in self.valid_states:
+            self.state = kwargs['state']
+        else:
+            self.state = 'disabled'
+
+        # create indicator
         self.indicator = C.create_oval(self.x-self.r, self.y-self.r, self.x+self.r, self.y+self.r,\
             fill="green",disabledfill="red",state=self.state)
+
+        # add label?
+        if 'text' in kwargs:
+            self.label = create_label(kwargs['text'])
+            self.label.place(self.x + 3 * self.r, self.y)
 
     def create_label(self,text):
         content = StringVar()
@@ -133,7 +137,6 @@ class Indicator(object):
         else:
             self.state = 'disabled'
         self.parent.itemconfig(self.indicator,state=self.state)
-
 
 
 def updateSetpoint():
@@ -190,7 +193,9 @@ SP_current_text.set('Current Setpoint = '+ str(PressureSetpoint))
 SP_current = Label(C, textvariable=SP_current_text, padx=5, font=("Helvetica",16))
 SP_current.place(x=50, y=300)
 
-enabled_ind = Indicator(C,550,50)
+enabled_ind = Indicator(C,550,60)
+pump_control_ind = Indicator(C,550,100)
+
 
 #--- Graph settings
 graph_height = 500
@@ -339,13 +344,17 @@ def writeData():
     if PressureSetpoint > 0:
         if DifferentialPressure < PressureSetpoint:
             PumpControl = True
+            pump_control_ind.change_state('normal')
         else:
             PumpControl = False
+            pump_control_ind.change_state('disabled')
     else:
         if DifferentialPressure > PressureSetpoint:
             PumpControl = True
+            pump_control_ind.change_state('normal')
         else:
             PumpControl = False
+            pump_control_ind.change_state('disabled')
 
     # Current pump status detected on pin 3 of PhD 4400 syringe pump
     PumpStatus = GPIO.input(PumpRunningInd) == GPIO.HIGH
