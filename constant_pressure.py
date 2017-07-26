@@ -347,13 +347,13 @@ def writeData():
     ## equation y=actual, x = pi, y=0.843x - 0.356
 
     Reading = (3.3*float(readadc_0(1)-readadc_0(2))/1023)*100 #conduct calibration here
-    DifferentialPressure=round(0.843*Reading-0.356,1) # to PSI - 100 psi sensor (for burst tester)
-    #DifferentialPressure=round(4207.1 * Reading - 2.6812,1) #to mbarr - 1 psi sensor (for cell filtration)
+    #DifferentialPressure=round(0.843*Reading-0.356,1) # to PSI - 100 psi sensor (for burst tester)
+    DifferentialPressure=round(4207.1 * Reading - 2.6812,1) #to mbarr - 1 psi sensor (for cell filtration)
     DiffAvg.pop(0)
     DiffAvg.append(DifferentialPressure)
     Diffshow=np.mean(DiffAvg)
-    DL.set("Diff Pressure: "+str(round(Diffshow,1)) + " psi")
-    #DL.set("Diff Pressure: "+str(round(Diffshow,1)) + " mbar")
+    #DL.set("Diff Pressure: "+str(round(Diffshow,1)) + " psi")
+    DL.set("Diff Pressure: "+str(round(Diffshow,1)) + " mbar")
 
     if PressureSetpoint > 0:
         if DifferentialPressure < PressureSetpoint:
@@ -391,7 +391,6 @@ def writeData():
             # check if previous signal was missed, cycle voltage to reset if needed
             if GPIO.input(PumpTrigger) == GPIO.LOW:
                 GPIO.output(PumpTrigger,GPIO.HIGH)
-            print 'setting output to low'
             GPIO.output(PumpTrigger,GPIO.LOW)
 
     # Direction Ind: high = refilling, low = infusing
