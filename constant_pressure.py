@@ -12,7 +12,6 @@ from pdb import set_trace as debugger
 #this is a test web edit
 
 #To Do
-## Add control of pump direction (using pin 8, rising edge sets infuse, falling edge sets refill
 ## Add indicators for pump settings (make class Indicator...)
 ## Remove comments
 ## Check math on flow and pressure sensor (callibrate the pressure sensor
@@ -87,6 +86,8 @@ class mainWindow(object):
         self.master=master
         self.b=Button(C,text="Exit",command= callback_end)
         self.b.place(x=500,y=350)
+        self.b1 = Button(C,text="Enable Pump",command=cycle_pump_enable)
+        self.b1.place(x=400,y=50)
         self.b2=Button(C,text="Update Setpoint",command=updateSetpoint)
         self.b2.place(x=350,y=300)
 
@@ -102,6 +103,15 @@ def updateSetpoint():
     m.popup(desc='Enter a new pressure setpoint in mbar:',confirm_text='update')
     PressureSetpoint = int(m.entryValue())
     SP_current_text.set('Current Setpoint = ' + str(PressureSetpoint))
+
+def cycle_pump_enable():
+    global EnablePump, enable_ind
+    # invert value
+    EnablePump = not EnablePump
+    if EnablePump == False:
+        enable_ind.config(state="DISABLED")
+    else:
+        enable_ind.config(state="NORMAL")
 
 
 root = Tk()
@@ -141,6 +151,12 @@ SP_current_text = StringVar()
 SP_current_text.set('Current Setpoint = '+ str(PressureSetpoint))
 SP_current = Label(C, textvariable=SP_current_text, padx=5, font=("Helvetica",16))
 SP_current.place(x=50, y=300)
+
+r = 10 #indicator radius
+centerX = 450
+centerY = 50
+enabled_ind = C.creat_oval(centerX-r,centerY-r,centerX+r,centerY+r,fill="green",disabledfill="red",state="DISABLED")
+
 
 #--- Graph settings
 graph_height = 500
