@@ -12,7 +12,6 @@ from pdb import set_trace as debugger
 #this is a test web edit
 
 #To Do
-## Change red line to show current set point, not max pressure.
 ## Make graph handle different ranges (pos and neg?)
 ## Add control of pump direction (using pin 8, rising edge sets infuse, falling edge sets refill
 ## Remove comments
@@ -23,7 +22,7 @@ from pdb import set_trace as debugger
 ## Specify location of popup (for some reason its currently random)
 #______________________________________________________________________________________________________________________
 #----------------------------------------------------------------------------------------------------------------------
-                                                                                                                                                                                                                      
+
 
 print("start")
 
@@ -73,11 +72,11 @@ class popupWindow(object):
         self.e.pack()
         self.b=Button(top,text=kwargs['confirm_text'],command=self.cleanup)
         self.b.pack()
-        
+
     def cleanup(self):
         self.value=self.e.get()
         self.top.destroy()
-    
+
 class mainWindow(object):
     def __init__(self,master):
         self.master=master
@@ -98,7 +97,7 @@ def updateSetpoint():
     m.popup(desc='Enter a new pressure setpoint in mbar:',confirm_text='update')
     PressureSetpoint = int(m.entryValue())
     SP_current_text.set('Current Setpoint = ' + str(PressureSetpoint))
-    
+
 
 root = Tk()
 root.title("Constant Pressure Controller")
@@ -106,7 +105,7 @@ root.title("Constant Pressure Controller")
 #----initializing GUI------------------
 ##background_image = PhotoImage(file='/home/pi/Desktop/Code/background.gif')
 ##w=background_image.width()
-##h=background_image.height() 
+##h=background_image.height()
 C = Canvas(root, bg='#333',height=513,width=600) #<------- i changed heigt and width... need updating
 C.focus_set() # Sets the keyboard focus to the canvas
 #frame=Frame(root)
@@ -159,7 +158,7 @@ for i in range(0,coordLength):
 for i in range(0,Average):
     FlowrateAvg.append(0.0)
     DiffAvg.append(0)
-    
+
 #putting X and Y corrdinites in a list
 def coordinate():
     global x0Coords, y0Coords, xy0Coords
@@ -185,22 +184,20 @@ def y_to_px(y):
 
 GraphC=Canvas(Graph, bg = "gray", height = height, width = screenWidth-1)
 maxP = GraphC.create_rectangle(0,0,20,50)
-cl0 = GraphC.create_line(xy0Coords,smooth=True)   
+cl0 = GraphC.create_line(xy0Coords,smooth=True)
 
 for y in range(ymin,ymax,axis_increment):
     y_px = y_to_px(y)
     if y_px < height and y_px > 0:
-        GraphC.create_text(25,y_px,anchor=W,text=str(y) + ' -')
+        if y >= 0:
+            label = ' ' + str(y)
+        else:
+            label = str(y)
+        GraphC.create_text(25,y_px,anchor=W,text=label + '  -')
 
-##num_steps = len(y_axis_labels)-1
-##step = int(1.0*height/num_steps)
-##for y in range(height,0,-1*step):
-##    label= str(y_axis_labels.pop())
-##    if y < height and y > 0:
-##        GraphC.create_text(25,y,anchor=W,text=label + ' -')
 
-    
-#setting up GPIO pins                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+
+#setting up GPIO pins
 ForwardFlow = 21
 PumpTrigger = 12
 PumpRunningInd = 16
@@ -210,7 +207,7 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 GPIO.setup(ForwardFlow, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)#Generally reads LOW
 GPIO.setup(PumpTrigger,GPIO.OUT,initial=GPIO.LOW)# pump control
-GPIO.setup(PumpRunningInd, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) 
+GPIO.setup(PumpRunningInd, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 
 #---------------------------------------------------------------------------------------
@@ -261,7 +258,7 @@ def move_time():
     root.after(baseTime*resolution,move_time)
 
 #-------------------------------- Write Data --------------------------------------
-def writeData(): 
+def writeData():
     global destination,Diffshow,samplePeriod,ForwardFlowCount,oldForwardFlowCount,forwardflow,FlowrateAvg,flowshow,PressureSetpoint, PumpStatus, PumpControl
 
     ##Calibration of sensor: Real Pressure = reading-(-1.06+.1007xreading) this was Marks
@@ -269,11 +266,13 @@ def writeData():
     ## equation y=actual, x = pi, y=0.843x - 0.356
 
     Reading = (3.3*float(readadc_0(1)-readadc_0(2))/1023)*100 #conduct calibration here
-    DifferentialPressure=round(0.843*Reading-0.356,1)
+    DifferentialPressure=round(0.843*Reading-0.356,1) # to PSI - 100 psi sensor (for burst tester)
+    #DifferentialPressure=round(4207.1 * Reading - 2.6812,1) #to mbarr - 1 psi sensor (for cell filtration)
     DiffAvg.pop(0)
     DiffAvg.append(DifferentialPressure)
     Diffshow=np.mean(DiffAvg)
     DL.set("Diff Pressure: "+str(round(Diffshow,1)) + " psi")
+    #DL.set("Diff Pressure: "+str(round(Diffshow,1)) + " mbar")
 
     if PressureSetpoint > 0:
         if DifferentialPressure < PressureSetpoint:
@@ -303,7 +302,7 @@ def writeData():
             if GPIO.input(PumpTrigger) == GPIO.LOW:
                 GPIO.output(PumpTrigger,GPIO.HIGH)
             GPIO.output(PumpTrigger,GPIO.LOW)
-     
+
     forwardflow=((ForwardFlowCount-oldForwardFlowCount)/samplePeriod)*13.0435 #13.0435 = 1000/4600*60 #FTB2003 gets 4600 pulses per liter
     FlowrateAvg.pop(0)
     FlowrateAvg.append(forwardflow)
