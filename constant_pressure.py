@@ -30,8 +30,8 @@ print("start")
 PressureSetpoint = 0 # mBar
 PumpStatus = False # false = off, true = on
 PumpControl = False
-infuse = True
-withdraw = False
+infuse = False
+withdraw = True
 PumpDirectionStatus = withdraw
 PumpDirectionControl = withdraw
 EnablePump = False
@@ -326,17 +326,19 @@ def writeData():
     else:
         PumpDirectionControl = withdraw
 
-    if PumpDirectionInd != PumpDirectionControl:
+    PumpDirectionStatus = GPIO.input(PumpDirectionInd) == GPIO.HIGH #True = withdraw
+
+    if PumpDirectionStatus != PumpDirectionControl:
         if PumpDirectionControl == infuse: #then cause change to infuse
             # check if previous signal was missed, cycle voltage to reset if needed
-            if GPIO.input(PumpControl) == GPIO.HIGH:
-                GPIO.output(PumpControl,GPIO.LOW)
-            GPIO.output(PumpControl,GPIO.HIGH)
+            if GPIO.input(PumpDirection) == GPIO.HIGH:
+                GPIO.output(PumpDirection,GPIO.LOW)
+            GPIO.output(PumpDirection,GPIO.HIGH)
         else: #cause change to withdraw
             # check if previous signal was missed, cycle voltage to reset if needed
-            if GPIO.input(PumpControl) == GPIO.LOW:
-                GPIO.output(PumpControl,GPIO.HIGH)
-            GPIO.output(PumpControl,GPIO.LOW)
+            if GPIO.input(PumpDirection) == GPIO.LOW:
+                GPIO.output(PumpDirection,GPIO.HIGH)
+            GPIO.output(PumpDirection,GPIO.LOW)
 
     forwardflow=((ForwardFlowCount-oldForwardFlowCount)/samplePeriod)*13.0435 #13.0435 = 1000/4600*60 #FTB2003 gets 4600 pulses per liter
     FlowrateAvg.pop(0)
