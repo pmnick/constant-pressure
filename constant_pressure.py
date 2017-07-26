@@ -143,6 +143,7 @@ SP_current = Label(C, textvariable=SP_current_text, padx=5, font=("Helvetica",16
 SP_current.place(x=50, y=300)
 
 #--- Graph settings
+graph_height = 500
 screenWidth = 450 # should name graphWidth
 resolution = 1 #number of pixels between data points, for visual purposes only
 timeRange = .5 #minutes
@@ -173,7 +174,7 @@ def coordinate():
 
 
 #---End initiation of lists
-graph_height = 500
+
 
 Graph= LabelFrame(root, text="Pressure Graph",height=graph_height+1,width=screenWidth)
 Graph.pack(side="left")
@@ -193,7 +194,6 @@ SP_line = GraphC.create_line(0,to_px(PressureSetpoint),0,to_px(PressureSetpoint)
 cl0 = GraphC.create_line(xy0Coords,smooth=True)
 
 for y in range(ymin,ymax,axis_increment):
-    global graph_height
     y_px = to_px(y)
     if y_px < graph_height and y_px > 0:
         if y >= 0:
