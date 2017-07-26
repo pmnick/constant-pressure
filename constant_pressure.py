@@ -189,7 +189,7 @@ cl0 = GraphC.create_line(xy0Coords,smooth=True)
 
 for y in range(ymin,ymax,axis_increment):
     y_px = to_px(y)
-    if y_px < height and y_px > 0:
+    if y_px < graph_height and y_px > 0:
         if y >= 0:
             label = ' ' + str(y)
         else:
