@@ -124,12 +124,11 @@ class Indicator(object):
         # add label?
         if 'text' in kwargs:
             self.label = self.create_label(kwargs['text'])
-            self.label.place(self.x + 3 * self.r, self.y)
 
     def create_label(self,text):
         content = StringVar()
         content.set(text)
-        return Label(self.parent, textvariable=content, padx=5, font=("Helvetica",16))
+        return Label(self.parent, textvariable=content, padx=5, font=("Helvetica",16)).place(self.x + 3 * self.r, self.y)
 
     def change_state(self,new_state):
         if new_state in self.valid_states:
