@@ -448,6 +448,7 @@ def callback_end():
     #os.rename(destination + tempFileName, destination + m.entryValue() + ".txt")
     print("shutting down")
     quit()
+    GPIO.cleanup()
 
 #Setting up event detection
 GPIO.add_event_detect(ForwardFlow, GPIO.RISING, callback=callback_fflow)
