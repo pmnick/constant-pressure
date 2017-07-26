@@ -12,8 +12,8 @@ from pdb import set_trace as debugger
 #this is a test web edit
 
 #To Do
-## Make graph handle different ranges (pos and neg?)
 ## Add control of pump direction (using pin 8, rising edge sets infuse, falling edge sets refill
+## Add indicators for pump settings (make class Indicator...)
 ## Remove comments
 ## Check math on flow and pressure sensor (callibrate the pressure sensor
 ## fingernail polish pressure sensor so it doesn't get plugged in backwards
@@ -30,6 +30,11 @@ print("start")
 PressureSetpoint = 0 # mBar
 PumpStatus = False # false = off, true = on
 PumpControl = False
+infuse = True
+withdraw = False
+PumpDirectionStatus = withdraw
+PumpDirectionControl = withdraw
+EnablePump = False
 
 #-------------------------------- Initializations --------------------------------------
 #Setting up Spi to read ADC
@@ -202,13 +207,17 @@ for y in range(ymin,ymax,axis_increment):
 ForwardFlow = 21
 PumpTrigger = 12
 PumpRunningInd = 16
+PumpDirectionInd = 24
+PumpDirection = 25
 on = GPIO.LOW
 off = GPIO.HIGH
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 GPIO.setup(ForwardFlow, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)#Generally reads LOW
-GPIO.setup(PumpTrigger,GPIO.OUT,initial=GPIO.LOW)# pump control
+GPIO.setup(PumpTrigger,GPIO.OUT,initial=GPIO.LOW) # pump control
 GPIO.setup(PumpRunningInd, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(PumpDirectionInd,GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(PumpDirection,GPIO.OUT)
 
 
 #---------------------------------------------------------------------------------------
@@ -290,6 +299,10 @@ def writeData():
     # Current pump status detected on pin 3 of PhD 4400 syringe pump
     PumpStatus = GPIO.input(PumpRunningInd) == GPIO.HIGH
 
+    # Force Pump Off if Enable == False
+    if not EnablePump:
+        PumpControl == False
+
     # Pump control sent to Pin 7 on PhD 4400 syringe pump
     # Rising edge starts pump
     # Falling edge stops pump
@@ -304,6 +317,25 @@ def writeData():
             if GPIO.input(PumpTrigger) == GPIO.LOW:
                 GPIO.output(PumpTrigger,GPIO.HIGH)
             GPIO.output(PumpTrigger,GPIO.LOW)
+
+    # Direction Ind: high = refilling, low = infusing
+    # Direction Control: Rising edge sets infuse, falling edge sets refilling/withdraw
+    if PressureSetpoint > 0:
+        PumpDirectionControl = infuse
+    else:
+        PumpDirectionControl = withdraw
+
+    if PumpDirectionInd != PumpDirectionControl:
+        if PumpDirectionControl == infuse: #then cause change to infuse
+            # check if previous signal was missed, cycle voltage to reset if needed
+            if GPIO.input(PumpControl) == GPIO.HIGH:
+                GPIO.output(PumpControl,GPIO.LOW)
+            GPIO.output(PumpControl,GPIO.HIGH)
+        else: #cause change to withdraw
+            # check if previous signal was missed, cycle voltage to reset if needed
+            if GPIO.input(PumpControl) == GPIO.LOW:
+                GPIO.output(PumpControl,GPIO.HIGH)
+            GPIO.output(PumpControl,GPIO.LOW)
 
     forwardflow=((ForwardFlowCount-oldForwardFlowCount)/samplePeriod)*13.0435 #13.0435 = 1000/4600*60 #FTB2003 gets 4600 pulses per liter
     FlowrateAvg.pop(0)
