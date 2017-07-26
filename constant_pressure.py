@@ -85,9 +85,9 @@ class mainWindow(object):
     def __init__(self,master):
         self.master=master
         self.b=Button(C,text="Exit",command= callback_end)
-        self.b.place(x=500,y=350)
+        self.b.place(x=600,y=350)
         self.b1 = Button(C,text="Enable Pump",command=cycle_pump_enable)
-        self.b1.place(x=400,y=50)
+        self.b1.place(x=400,y=100)
         self.b2=Button(C,text="Update Setpoint",command=updateSetpoint)
         self.b2.place(x=300,y=300)
 
@@ -193,7 +193,7 @@ SP_current_text.set('Current Setpoint = '+ str(PressureSetpoint))
 SP_current = Label(C, textvariable=SP_current_text, padx=5, font=("Helvetica",16))
 SP_current.place(x=50, y=300)
 
-enabled_ind = Indicator(C,550,60)
+enabled_ind = Indicator(C,550,110)
 pump_control_ind = Indicator(C,400,200,text="Pump Control")
 
 pump_direction = StringVar()
