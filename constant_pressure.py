@@ -194,7 +194,7 @@ SP_current = Label(C, textvariable=SP_current_text, padx=5, font=("Helvetica",16
 SP_current.place(x=50, y=300)
 
 enabled_ind = Indicator(C,550,60)
-pump_control_ind = Indicator(C,550,100)
+pump_control_ind = Indicator(C,500,100,text="Pump Control")
 
 
 #--- Graph settings
@@ -344,17 +344,13 @@ def writeData():
     if PressureSetpoint > 0:
         if DifferentialPressure < PressureSetpoint:
             PumpControl = True
-            pump_control_ind.change_state('normal')
         else:
             PumpControl = False
-            pump_control_ind.change_state('disabled')
     else:
         if DifferentialPressure > PressureSetpoint:
             PumpControl = True
-            pump_control_ind.change_state('normal')
         else:
             PumpControl = False
-            pump_control_ind.change_state('disabled')
 
     # Current pump status detected on pin 3 of PhD 4400 syringe pump
     PumpStatus = GPIO.input(PumpRunningInd) == GPIO.HIGH
@@ -362,6 +358,11 @@ def writeData():
     # Force Pump Off if Enable == False
     if not EnablePump:
         PumpControl == False
+
+    if PumpControl:
+        pump_control_ind.change_state('normal')
+    else:
+        pump_control_ind.change_state('disabled')
 
     # Pump control sent to Pin 7 on PhD 4400 syringe pump
     # Rising edge starts pump
