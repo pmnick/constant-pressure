@@ -89,7 +89,7 @@ class mainWindow(object):
         self.b1 = Button(C,text="Enable Pump",command=cycle_pump_enable)
         self.b1.place(x=400,y=50)
         self.b2=Button(C,text="Update Setpoint",command=updateSetpoint)
-        self.b2.place(x=250,y=300)
+        self.b2.place(x=300,y=300)
 
     def popup(self,**kwargs):
         self.w=popupWindow(self.master,**kwargs)
@@ -193,7 +193,7 @@ SP_current_text.set('Current Setpoint = '+ str(PressureSetpoint))
 SP_current = Label(C, textvariable=SP_current_text, padx=5, font=("Helvetica",16))
 SP_current.place(x=50, y=300)
 
-enabled_ind = Indicator(C,550,75)
+enabled_ind = Indicator(C,550,60)
 pump_control_ind = Indicator(C,400,200,text="Pump Control")
 
 pump_direction = StringVar()
@@ -203,7 +203,7 @@ else:
     pump_direction.set('infuse')
 
 pump_direction_ind = Label(C, textvariable=pump_direction, padx=5, font=("Helvetica",14))
-pump_direction_ind.place(x=400, y=250)
+pump_direction_ind.place(x=400, y=250,anchor=W)
 
 #--- Graph settings
 graph_height = 500
