@@ -152,7 +152,7 @@ coordLength = int(screenWidth/resolution)
 #---initiation of lists
 for i in range(0,coordLength):
     x0Coords.append(i*resolution)
-    y0Coords.append(249)
+    y0Coords.append(graph_height/2)
     xy0Coords.append(0)
     xy0Coords.append(0)
 for i in range(0,Average):
@@ -175,7 +175,7 @@ Graph.pack(side="left")
 graph_height = 500
 ymin = -100
 ymax = 100
-axis_increment = 20
+axis_increment = 20 # this should divide evenly into the range
 
 def to_px(y):
     global ymin,ymax,graph_height
@@ -247,7 +247,7 @@ def move_time():
     GraphC.delete(cl0)
     if maxPressure < Diffshow:
         maxPressure = Diffshow
-    
+
     SP_line = GraphC.create_line(0,to_px(PressureSetpoint),screenWidth,to_px(PressureSetpoint), fill="red")
     MP.set("Max Pressure: " + str(maxPressure) + " psi")
     #PressureSetpoint = int(SP_content.get())
