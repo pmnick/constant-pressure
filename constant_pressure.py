@@ -138,7 +138,7 @@ SP_current = Label(C, textvariable=SP_current_text, padx=5, font=("Helvetica",16
 SP_current.place(x=50, y=300)
 
 #--- Graph settings
-screenWidth = 450
+screenWidth = 450 # should name graphWidth
 resolution = 1 #number of pixels between data points, for visual purposes only
 timeRange = .5 #minutes
 baseTime = int(timeRange*60*1000/screenWidth)
@@ -168,26 +168,27 @@ def coordinate():
 
 
 #---End initiation of lists
+graph_height = 500
 
-Graph= LabelFrame(root, text="Pressure Graph",height=501,width=screenWidth)
+Graph= LabelFrame(root, text="Pressure Graph",height=graph_height+1,width=screenWidth)
 Graph.pack(side="left")
-height = 500
+graph_height = 500
 ymin = -100
 ymax = 100
 axis_increment = 20
 
-def y_to_px(y):
-    global ymin,ymax,height
-    return int(height - (1.0*y-ymin)/(ymax-ymin)*height)
+def to_px(y):
+    global ymin,ymax,graph_height
+    return int(graph_height - (1.0*y-ymin)/(ymax-ymin)*graph_height)
 
 #debugger()
 
-GraphC=Canvas(Graph, bg = "gray", height = height, width = screenWidth-1)
+GraphC=Canvas(Graph, bg = "gray", height = graph_height, width = screenWidth-1)
 maxP = GraphC.create_rectangle(0,0,20,50)
 cl0 = GraphC.create_line(xy0Coords,smooth=True)
 
 for y in range(ymin,ymax,axis_increment):
-    y_px = y_to_px(y)
+    y_px = to_px(y)
     if y_px < height and y_px > 0:
         if y >= 0:
             label = ' ' + str(y)
@@ -246,7 +247,7 @@ def move_time():
     GraphC.delete(cl0)
     if maxPressure < Diffshow:
         maxPressure = Diffshow
-    maxP = GraphC.create_rectangle(0,250,480,249-int(1.0*PressureSetpoint*250/100), outline="red")
+    SP_line = GraphC.create_line(0,screenWidth,to_px(PressureSetpoint),to_px(PressureSetpoint), fill="red")
     MP.set("Max Pressure: " + str(maxPressure) + " psi")
     #PressureSetpoint = int(SP_content.get())
     shiftCoords(249-(Diffshow*250/100))
