@@ -193,6 +193,7 @@ SP_line = GraphC.create_line(0,to_px(PressureSetpoint),0,to_px(PressureSetpoint)
 cl0 = GraphC.create_line(xy0Coords,smooth=True)
 
 for y in range(ymin,ymax,axis_increment):
+    global graph_height
     y_px = to_px(y)
     if y_px < graph_height and y_px > 0:
         if y >= 0:
