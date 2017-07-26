@@ -123,7 +123,7 @@ class Indicator(object):
 
         # add label?
         if 'text' in kwargs:
-            self.label = create_label(kwargs['text'])
+            self.label = self.create_label(kwargs['text'])
             self.label.place(self.x + 3 * self.r, self.y)
 
     def create_label(self,text):
