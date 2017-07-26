@@ -124,11 +124,12 @@ class Indicator(object):
         # add label?
         if 'text' in kwargs:
             self.label = self.create_label(kwargs['text'])
+            self.label.place(x=self.x + 3 * self.r, y=self.y)
 
     def create_label(self,text):
         content = StringVar()
         content.set(text)
-        return Label(self.parent, textvariable=content, padx=5, font=("Helvetica",16)).place(self.x + 3 * self.r, self.y)
+        return Label(self.parent, textvariable=content, padx=5, font=("Helvetica",14))
 
     def change_state(self,new_state):
         if new_state in self.valid_states:
@@ -193,7 +194,7 @@ SP_current = Label(C, textvariable=SP_current_text, padx=5, font=("Helvetica",16
 SP_current.place(x=50, y=300)
 
 enabled_ind = Indicator(C,550,60)
-pump_control_ind = Indicator(C,500,100,text="Pump Control")
+pump_control_ind = Indicator(C,450,100,text="Pump Control")
 
 
 #--- Graph settings
@@ -356,7 +357,7 @@ def writeData():
 
     # Force Pump Off if Enable == False
     if not EnablePump:
-        PumpControl == False
+        PumpControl = False
 
     if PumpControl:
         pump_control_ind.change_state('normal')
