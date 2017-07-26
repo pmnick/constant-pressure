@@ -283,7 +283,7 @@ GPIO.setup(PumpRunningInd, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(PumpDirectionInd,GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(PumpDirection,GPIO.OUT)
 
-def print_gpio():
+def print_gpio(event):
     print "pump running ind: %s" % GPIO.input(PumpRunningInd)
     print "pump trigger: %s" % GPIO.input(PumpTrigger)
     print "pump direction ind: %s" % GPIO.input(PumpDirectionInd)
