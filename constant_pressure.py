@@ -129,7 +129,7 @@ class Indicator(object):
     def create_label(self,text):
         content = StringVar()
         content.set(text)
-        return Label(self.parent, textvariable=content, padx=5, font=("Helvetica",14))
+        return Label(self.parent, textvariable=content, padx=5, font=("Helvetica",14),anchor=W)
 
     def change_state(self,new_state):
         if new_state in self.valid_states:
@@ -194,8 +194,16 @@ SP_current = Label(C, textvariable=SP_current_text, padx=5, font=("Helvetica",16
 SP_current.place(x=50, y=300)
 
 enabled_ind = Indicator(C,550,60)
-pump_control_ind = Indicator(C,450,100,text="Pump Control")
+pump_control_ind = Indicator(C,400,100,text="Pump Control")
 
+pump_direction = StringVar()
+if PumpDirectionControl == withdraw:
+    pump_direction.set('withdraw')
+else:
+    pump_direction.set('infuse')
+
+pump_direction_ind = Label(C, textvariable=pump_direction, padx=5, font=("Helvetica",14))
+pump_direction_ind.place(x=400, y=150)
 
 #--- Graph settings
 graph_height = 500
@@ -399,6 +407,11 @@ def writeData():
             if GPIO.input(PumpDirection) == GPIO.LOW:
                 GPIO.output(PumpDirection,GPIO.HIGH)
             GPIO.output(PumpDirection,GPIO.LOW)
+
+    if PumpDirectionControl == withdraw:
+        pump_direction.set('withdraw')
+    else:
+        pump_direction.set('infuse')
 
     forwardflow=((ForwardFlowCount-oldForwardFlowCount)/samplePeriod)*13.0435 #13.0435 = 1000/4600*60 #FTB2003 gets 4600 pulses per liter
     FlowrateAvg.pop(0)
