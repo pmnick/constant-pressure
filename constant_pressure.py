@@ -98,6 +98,44 @@ class mainWindow(object):
     def entryValue(self):
         return self.w.value
 
+class Indicator(object):
+    def __init__(self, parent,centerX,centerY,**kwargs):
+        self.parent=parent
+        self.x=centerX
+        self.y=centerY
+        self.valid_states = ['normal','disabled','hidden']
+
+        if 'text' in kwargs:
+            self.label = create_label(kwargs['text'])
+            self.label.place(centerX,centerY)
+
+        if 'state' in kwargs and kwargs['state'] in self.valid_states:
+            self.state = kwargs['state']
+        else:
+            self.state = 'disabled'
+
+        if 'radius' in kwargs:
+            self.r = kwargs['radius']
+        else:
+            self.r = 10
+
+        self.indicator = C.create_oval(self.x-self.r, self.y-self.r, self.x+self.r, self.y+self.r,\
+            fill="green",disabledfill="red",state=self.state)
+
+    def create_label(self,text):
+        content = StringVar()
+        content.set(text)
+        return = Label(self.parent, textvariable=content, padx=5, font=("Helvetica",16))
+
+    def change_state(self,new_state):
+        if new_state in self.valid_states:
+            self.state = new_state
+        else:
+            self.state = 'disabled'
+        self.parent(self.indicator,state=self.state)
+
+
+
 def updateSetpoint():
     global PressureSetpoint
     m.popup(desc='Enter a new pressure setpoint in mbar:',confirm_text='update')
@@ -105,13 +143,13 @@ def updateSetpoint():
     SP_current_text.set('Current Setpoint = ' + str(PressureSetpoint))
 
 def cycle_pump_enable():
-    global EnablePump, C, enabled_ind
+    global EnablePump, enabled_ind
     # invert value
     EnablePump = not EnablePump
     if EnablePump == False:
-        C.itemconfig(enabled_ind,state="disabled")
+        enabled_ind.change_state("disabled")
     else:
-        C.itemconfig(enabled_ind,state="normal")
+        enabled_ind.change_state("normal")
 
 
 root = Tk()
@@ -152,11 +190,7 @@ SP_current_text.set('Current Setpoint = '+ str(PressureSetpoint))
 SP_current = Label(C, textvariable=SP_current_text, padx=5, font=("Helvetica",16))
 SP_current.place(x=50, y=300)
 
-r = 10 #indicator radius
-centerX = 550
-centerY = 50
-enabled_ind = C.create_oval(centerX-r,centerY-r,centerX+r,centerY+r,fill="green",disabledfill="red",state="disabled")
-
+enabled_ind = Indicator(C,550,50)
 
 #--- Graph settings
 graph_height = 500
