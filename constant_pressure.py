@@ -391,6 +391,7 @@ def writeData():
             # check if previous signal was missed, cycle voltage to reset if needed
             if GPIO.input(PumpTrigger) == GPIO.LOW:
                 GPIO.output(PumpTrigger,GPIO.HIGH)
+            print 'setting output to low'
             GPIO.output(PumpTrigger,GPIO.LOW)
 
     # Direction Ind: high = refilling, low = infusing
