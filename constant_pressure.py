@@ -85,7 +85,7 @@ class mainWindow(object):
     def __init__(self,master):
         self.master=master
         self.b=Button(C,text="Exit",command= callback_end)
-        self.b.place(x=600,y=350)
+        self.b.place(x=500,y=450)
         self.b1 = Button(C,text="Enable Pump",command=cycle_pump_enable)
         self.b1.place(x=400,y=100)
         self.b2=Button(C,text="Update Setpoint",command=updateSetpoint)
