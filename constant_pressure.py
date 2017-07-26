@@ -322,7 +322,7 @@ def move_time():
         maxPressure = Diffshow
 
     SP_line = GraphC.create_line(0,to_px(PressureSetpoint),screenWidth,to_px(PressureSetpoint), fill="red")
-    MP.set("Max Pressure: " + str(maxPressure) + " psi")
+    MP.set("Max Pressure: " + str(round(maxPressure,1)) + " psi")
     #PressureSetpoint = int(SP_content.get())
     shiftCoords(249-(Diffshow*250/100))
     cl0 = GraphC.create_line(xy0Coords)
