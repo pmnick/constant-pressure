@@ -89,7 +89,7 @@ class mainWindow(object):
         self.b1 = Button(C,text="Enable Pump",command=cycle_pump_enable)
         self.b1.place(x=400,y=50)
         self.b2=Button(C,text="Update Setpoint",command=updateSetpoint)
-        self.b2.place(x=350,y=220)
+        self.b2.place(x=250,y=300)
 
     def popup(self,**kwargs):
         self.w=popupWindow(self.master,**kwargs)
