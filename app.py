@@ -1,3 +1,10 @@
+''' documentation:
+        - instructions on priming
+        - how to start he system
+        - notes on setting speed of syringe pump
+
+ '''
+
 from Tkinter import *
 from modules.graphs import TimeGraph
 import math

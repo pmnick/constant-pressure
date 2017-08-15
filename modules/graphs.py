@@ -41,21 +41,21 @@ class TimeGraph(object):
         if  dt < 0:
             self.dt = time_range / float(self.plot_width)
         data_length = int(time_range / self.dt)
-        self.data_x = self.initial_x(data_length)
+        self.data_x = self._initial_x(data_length)
         self.data_y = np.zeros(data_length)
-        self.set_point = 0
+        self.setpoint = 0
         self.canvas = Canvas(master, width=self.width, height=self.height)
         self.canvas.pack()
 
         # add initial elements to the canvas
-        self.set_point_line = self.canvas.create_line(0, 0, 1, 0)
+        self.setpoint_line = self.canvas.create_line(0, 0, 1, 0)
         self.line = self.canvas.create_line(0, 0, 1, 0)
 
         self.update_y_axis()
         self.draw_setpoint()
         self.draw_line()
 
-    def initial_x(self, data_length):
+    def _initial_x(self, data_length):
         x = np.zeros(data_length)
         for i in range(0, data_length):
             x[i] = float(self.plot_width / data_length * i + self.axis_offset)
@@ -94,23 +94,30 @@ class TimeGraph(object):
                                (1, self.data_x.shape[0] * 2))
         self.line = self.canvas.create_line(xy_coords[0].tolist(), smooth=True, fill="blue")
 
+    def update_setpoint(self, value):
+        self.check_range(value)
+        self.setpoint = value
+        self.draw_setpoint
+
     def draw_setpoint(self):
         '''Adds indication of setpoint to canvas'''
-        self.canvas.delete(self.set_point_line)
-        self.set_point_line = self.canvas.create_line(self.axis_offset, self.to_px(self.set_point),
-                                                      self.width, self.to_px(self.set_point),
-                                                      fill="red")
+        self.canvas.delete(self.setpoint_line)
+        self.setpoint_line = self.canvas.create_line(self.axis_offset, self.to_px(self.setpoint),
+                                                     self.width, self.to_px(self.setpoint),
+                                                     fill="red")
 
     def next(self, value):
         '''Delete oldest value and append new value to data array'''
         # TODO probably should track max and min and shrink the range
         # back down if a large spike has left the screen
+        self.check_range(value)
+        self.data_y = np.append(self.data_y[1:], value)
+        self.draw_line()
+
+    def check_range(self, value):
         if value > self.ymax:
             self.ymax = int(value + (self.ymax - self.ymin) * .05)
             self.update_y_axis()
         if value < self.ymin:
             self.ymin = int(value - (self.ymax - self.ymin) * .05)
-        self.update_y_axis()
-
-        self.data_y = np.append(self.data_y[1:], value)
-        self.draw_line()
+            self.update_y_axis()
