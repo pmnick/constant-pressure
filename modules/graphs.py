@@ -27,9 +27,11 @@ from Tkinter import *
 import numpy as np
 from pdb import set_trace as debugger
 
+# CONVERT TO ACTUAL INHERITANCE FROM CANVAS
+
 class TimeGraph(object):
     '''Plots a scrolling line graph as each new datapoint is received'''
-    def __init__(self, master, width=450, height=500, ymin=-100, ymax=100, dt=-1, time_range=30):
+    def __init__(self, parent, width=450, height=500, ymin=-100, ymax=100, dt=-1, time_range=30):
         # dt and time_range both in seconds
         self.width = width
         self.axis_offset = 80 # region where y-axis labels are without any plotting
@@ -44,7 +46,7 @@ class TimeGraph(object):
         self.data_x = self._initial_x(data_length)
         self.data_y = np.zeros(data_length)
         self.setpoint = 0
-        self.canvas = Canvas(master, width=self.width, height=self.height)
+        self.canvas = Canvas(parent, width=self.width, height=self.height)
         self.canvas.pack()
 
         # add initial elements to the canvas

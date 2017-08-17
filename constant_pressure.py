@@ -342,7 +342,7 @@ def move_time():
     #print(float(readadc_0(0))/1023*250)
     #title="V= " , str(round(3.3*float(readadc_0(2)-readadc_0(0))/1023,2)) , str(round(3.3*float(readadc_0(2))/1023,2)), str(round(3.3*float(readadc_0(0))/1023,2))
     #root.title(title)
-    root.after(baseTime*resolution,move_time)
+    
 
 #-------------------------------- Write Data --------------------------------------
 def writeData():
@@ -458,7 +458,7 @@ def callback_end():
     # a.close()
     #os.rename(destination + tempFileName, destination + m.entryValue() + ".txt")
     print("shutting down")
-    
+
     quit()
     GPIO.cleanup()
 
