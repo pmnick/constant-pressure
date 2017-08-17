@@ -41,7 +41,7 @@ helpmenu = Menu(menu)
 menu.add_cascade(label="Help", menu=helpmenu)
 helpmenu.add_command(label="About...", command=callback)
 
-graph = TimeGraph(root)
+
 
 # Control Panel
 enable_pump = False
@@ -58,7 +58,9 @@ pump_direction_ind.pack()
 pump_direction_ind.grid(row=1, column=0, columnspan=2, sticky=W)
 
 # final layout
-graph.canvas.grid(row=0, column=0)
+graph = TimeGraph(root)
+graph.pack()
+graph.grid(row=0, column=0)
 control_panel.grid(row=0, column=1)
 
 
