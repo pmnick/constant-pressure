@@ -1,7 +1,10 @@
 import math
-from Tkinter import Tk, Menu, LabelFrame, Button, W
-from modules.graphs import TimeGraph
-from modules.indicators import LightIndicator, TextIndicator
+from Tkinter import Tk
+from modules.gui.interfaces import UserInterface
+import numpy as np
+from pdb import set_trace as debugger
+#from modules.pumps import Phd4400
+from modules.virtual_pumps import VirtualPhd4400
 
 ''' documentation:
         - instructions on priming
@@ -10,66 +13,87 @@ from modules.indicators import LightIndicator, TextIndicator
 
  '''
 
-def callback():
-    print "called the callback!"
-
-def cycle_pump_enable():
-    global enable_pump
-    enable_pump = not enable_pump
-    enable_ind.set_state(enable_pump)
-    if enable_pump == False:
-        pump_direction_ind.set_value('disabled')
-    else:
-        pump_direction_ind.set_value('normal')
+ # NEXT STEPS:
+     # organize file structure and imports
+     # create a virtual pump for testing
+     # add shutdown protocols
+     # test the system
+     # write docs and add to the menu (just have func calls to open text files so others could modify them as desired)
+     # add calibration features
+     # implement with real system
+         # setup GPIO
+         # initialize pump
+# Initialize UI
 
 root = Tk()
-value = 0
+ui = UserInterface(root)
+ui.grid(row=0, column=0)
 
+# temp values for mock
+value = 1.0
+previous_value = 1.0
 
-# create a menu
-menu = Menu(root)
-root.config(menu=menu)
+#initialize GPIO here
+pump = VirtualPhd4400(running_control_pin=17,
+                      running_indicator_pin=22,
+                      direction_control_pin=23,
+                      direction_indicator_pin=24)
 
-filemenu = Menu(menu)
-menu.add_cascade(label="File", menu=filemenu)
-filemenu.add_command(label="New", command=callback)
-filemenu.add_command(label="Open...", command=callback)
-filemenu.add_separator()
-filemenu.add_command(label="Exit", command=callback)
+# Configuration settings
+sample_period = 20 #milliseconds
+refresh_period = 75
+averaged_samples = 5
+cumulative_pressure = np.zeros(averaged_samples)
 
-helpmenu = Menu(menu)
-menu.add_cascade(label="Help", menu=helpmenu)
-helpmenu.add_command(label="About...", command=callback)
+def direction_to_text(direction):
+    return 'withdraw' if direction == pump.WITHDRAW else 'infuse'
 
+class State(object):
+    '''Assess inputs and determine the state of the controller'''
+    def __init__(self, pressure, setpoint, pump_enabled):
+        self.run_pump = self._run_pump(pressure, setpoint, pump_enabled)
+        self.pump_direction = pump.WITHDRAW if setpoint <= 0 else pump.INFUSE
 
+    def _run_pump(self, pressure, setpoint, pump_enabled):
+        if not pump_enabled: return False
+        if setpoint > 0:
+            return True if pressure < setpoint else False
+        return True if pressure > setpoint else False
 
-# Control Panel
-enable_pump = False
-control_panel = LabelFrame(root, text="Control Panel", padx=5, pady=5)
-control_panel.pack()
-enable_button = Button(control_panel, text="Enable Pump", command=cycle_pump_enable)
-enable_button.pack()
-enable_button.grid(row=0, column=0, sticky=W)
-enable_ind = LightIndicator(control_panel)
-enable_ind.pack()
-enable_ind.grid(row=0, column=1)
-pump_direction_ind = TextIndicator(control_panel, "Pump Direction", "test value")
-pump_direction_ind.pack()
-pump_direction_ind.grid(row=1, column=0, columnspan=2, sticky=W)
+def mock_read_pressure():
+    global value, pump
+    if pump.is_started:
+        if pump.direction == pump.INFUSE:
+            value += 4.4
+        else:
+            value -= 4.4
+    else:
+        value += -6.7 if value > 0 else 6.7
+    return value
 
-# final layout
-graph = TimeGraph(root)
-graph.pack()
-graph.grid(row=0, column=0)
-control_panel.grid(row=0, column=1)
+def avg_pressure():
+    global cumulative_pressure
+    cumulative_pressure = np.append(cumulative_pressure[1:], mock_read_pressure())
+    return np.average(cumulative_pressure)
 
+def refresh():
+    pressure = avg_pressure()
+    ui.graph.next(pressure)
+    ui.indicators.pressure_ind.set_value(round(pressure, 2))
 
+    state = State(pressure, ui.controls.pressure_setpoint, ui.controls.pump_enabled)
+    if state.run_pump != pump.is_started:
+        pump.set_running(state.run_pump)
+        ui.indicators.pump_running_output_ind.set_state(state.run_pump)
+    ui.indicators.pump_running_input_ind.set_state(pump.is_started)
 
-def refresh_graph():
-    global value
-    graph.next(math.sin(value) * 120)
-    value += .1
-    root.after(50, refresh_graph)
+    if state.pump_direction != pump.direction:
+        pump.set_direction(state.pump_direction)
+        ui.indicators.pump_direction_output_ind.set_value(direction_to_text(state.pump_direction))
+    ui.indicators.pump_direction_input_ind.set_value(direction_to_text(pump.direction))
 
-root.after(50, refresh_graph)
+    root.after(refresh_period, refresh)
+
+root.after(refresh_period, refresh)
+#root.after(sample_period, acquire_data)
 root.mainloop()

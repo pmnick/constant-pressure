@@ -7,12 +7,12 @@ class TextIndicator(Label, object):
         self.parent = parent
         self.prefix = prefix
         self.value = StringVar()
-        self.value.set('{}: {}'.format(prefix, initial_value))
+        self.value.set('{}{}'.format(prefix, initial_value))
         super(TextIndicator, self).__init__(parent, textvariable=self.value,
                                             padx=5, font=("Helvetica", 14))
 
     def set_value(self, new_value):
-        self.value.set('{}: {}'.format(self.prefix, new_value))
+        self.value.set('{}{}'.format(self.prefix, new_value))
 
 
 class LightIndicator(Frame, object):
@@ -25,12 +25,10 @@ class LightIndicator(Frame, object):
             self.value = StringVar()
             self.value.set(text)
             self.label = Label(self, textvariable=self.value, padx=5, font=("Helvietica", 14))
-            self.label.pack()
             self.label.grid(row=0, column=0)
 
         # initialize indicator
         self.canvas = Canvas(self, width=r * 2 + 2, height=r * 2 + 2)
-        self.canvas.pack()
         self.canvas.grid(row=0, column=1)
         self.r = r
         self.light = self.canvas.create_oval(3, 3, r * 2 + 3, r * 2 + 3,\

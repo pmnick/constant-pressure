@@ -49,17 +49,15 @@ class Phd4400(object):
         self.direction_indicator_pin = direction_indicator_pin
         GPIO.setup(direction_indicator_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
-        self.enabled = False
-        self.direction = self.WITHDRAW
+        # Set safe starting conditions
         self.stop()
-
         if self.direction == self.INFUSE:
             self.withdraw()
 
     # Enable/Disable or on/off (if off, start will not work)
-    def start(self):
-        '''Activate the pump if enabled and not running. If already running, do nothing. '''
-        if self.enabled and not self.is_started:
+    def run(self, bool):
+        '''Activate the pump and not running. If already running, do nothing. '''
+        if not self.is_started:
             # check if previous signal was missed, cycle voltage to reset if needed
             if GPIO.input(self.running_control_pin) == GPIO.HIGH:
                 GPIO.output(self.running_control_pin, GPIO.LOW)
@@ -75,7 +73,7 @@ class Phd4400(object):
 
     @property
     def is_started(self):
-        '''Return running status according to the pump'''
+        '''Read and return running status from pump'''
         return GPIO.input(self.running_indicator_pin) == GPIO.HIGH
 
     def infuse(self):
@@ -95,7 +93,7 @@ class Phd4400(object):
 
     @property
     def direction(self):
-        '''Return pump direction according to the pump'''
+        '''Read and return direction from pump'''
         return GPIO.input(self.direction_indicator_pin) == GPIO.HIGH
 
     def print_gpio(self):
@@ -104,15 +102,3 @@ class Phd4400(object):
         print "pump running ind pin: %s" % GPIO.input(self.running_indicator_pin)
         print "pump direction control pin: %s" %GPIO.input(self.direction_control_pin)
         print "pump direction ind pin: %s" % GPIO.input(self.direction_indicator_pin)
-
-
-
-
-# some other quick notes:
-    # what other classes should be abstracted?
-        # ScrollingLineGraph
-            # change pop(0) to using collections.deque with popleft and append... this is much faster
-        # Indicators
-        # Label
-        # PressureSensor
-        # remove flow sensor for now... it would also logically be it's own class

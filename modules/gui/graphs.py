@@ -31,9 +31,9 @@ from pdb import set_trace as debugger
 
 class TimeGraph(Canvas, object):
     '''Plots a scrolling line graph as each new datapoint is received'''
-    def __init__(self, parent, width=450, height=500, ymin=-100, ymax=100, dt=-1, time_range=30):
+    def __init__(self, parent, width=450, height=500, ymin=-100, ymax=100, dt=-1, time_range=30, bg='white'):
         # dt and time_range both in seconds
-        super(TimeGraph, self).__init__(parent, width=width, height=height)
+        super(TimeGraph, self).__init__(parent, width=width, height=height, bg=bg)
         self.width = width
         self.axis_offset = 80 # region where y-axis labels are without any plotting
         self.plot_width = width - self.axis_offset
@@ -98,7 +98,7 @@ class TimeGraph(Canvas, object):
     def update_setpoint(self, value):
         self.check_range(value)
         self.setpoint = value
-        self.draw_setpoint
+        self.draw_setpoint()
 
     def draw_setpoint(self):
         '''Adds indication of setpoint to canvas'''
